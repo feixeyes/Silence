@@ -3,6 +3,7 @@
  */
 package com.feixeyes;
 
+import com.feixeyes.utils.CheckUtil;
 import com.feixeyes.utils.XMLUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -12,10 +13,11 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import com.feixeyes.utils.CheckUtil;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,20 +60,36 @@ public class Silence {
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    String handlePost(HttpServletRequest request) {
+    String handlePost(HttpServletRequest request, HttpServletResponse response ) throws UnsupportedEncodingException {
+
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
+
 
         String responseStr = "I'm silence!";
         try{
             Map<String,String> infoMap = parseXml(request);
             for( Map.Entry<String,String> en : infoMap.entrySet()){
-                System.out.println(en.getKey()+":" + en.getValue());
+//                System.out.println(en.getKey()+":" + en.getValue());
+//                if(en.getKey()=="content") {
+                System.out.println("==============print content==========");
+                String content = en.getValue();
+                System.out.println(en.getKey()+":" + changeCharSet(content,"UTF-8"));
+
+                if(content.equals(new String(content.getBytes("iso8859-1"), "iso8859-1")))
+                {
+                    System.out.println("==============print content 2==========");
+                    System.out.println(en.getKey()+":" + changeCharSet(content,"UTF-8"));
+                    content =new String(content.getBytes("iso8859-1"),"utf-8");
+                }
+//                }
             }
 
             String toUserName = infoMap.get("ToUserName");
             String fromUserName = infoMap.get("FromUserName") ;
 
             switch (infoMap.get("MsgType")) {
-                case "text": responseStr = processTextMsg(infoMap.get("content")); break;
+                case "text": responseStr = processTextMsg(changeCharSet(infoMap.get("content"),"UTF-8")); break;
                 case "voice":
                 case "image":
                 case "location":
@@ -97,8 +115,24 @@ public class Silence {
         return XMLUtils.textMessageToXml(textMsg);
     }
 
-    private String processTextMsg(String ask) {
-        return "I'm waiting Jingjing";
+    private String changeCharSet( String str, String newCharset) throws UnsupportedEncodingException {
+
+        if (str != null) {
+            //System.out.println(str);
+            // 用默认字符编码解码字符串。
+            byte[] bs = str.getBytes();
+            // 用新的字符编码生成字符串
+            String res = new String(bs, newCharset);
+            //System.out.println("UTF-8 encode");
+            //System.out.println(res);
+            return  res;
+        }
+        return str;
+    }
+
+    private String processTextMsg(String ask) throws UnsupportedEncodingException {
+//        return TransApi.trans2EN(ask);
+        return ask;
     }
 
     private Map<String, String> parseXml(HttpServletRequest request) throws Exception {
