@@ -60,9 +60,8 @@ public class Silence {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
-
-        String responseStr = "I'm silence!";
         try{
+            String responseStr;
             Map<String,String> infoMap = parseXml(request);
             for( Map.Entry<String,String> en : infoMap.entrySet()){
                 System.out.println(en.getKey()+":" + en.getValue());
@@ -79,7 +78,7 @@ public class Silence {
                 default : responseStr = "I don't know what's you say!";
             }
 
-            String res = mkXML(responseStr,toUserName,fromUserName); //swap to and from username
+            String res = mkTextXML(responseStr,toUserName,fromUserName); //swap to and from username
             System.out.println(res);
             return res;
         }
@@ -87,10 +86,10 @@ public class Silence {
             System.out.println(e.toString());
         }
 
-        return responseStr;
+        return "success";
     }
 
-    private String mkXML(String responseStr, String fromUserName, String toUserName){
+    private String mkTextXML(String responseStr, String fromUserName, String toUserName){
         TextMessage textMsg = new TextMessage();
         textMsg.setFromUserName(fromUserName);
         textMsg.setToUserName(toUserName);
