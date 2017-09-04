@@ -6,6 +6,7 @@ package com.feixeyes;
 import com.baidu.translate.TransApi;
 import com.feixeyes.utils.CheckUtil;
 import com.feixeyes.utils.XMLUtils;
+
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -21,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
+//import java.net.URLEncoder;
 
 
 @RestController
@@ -98,7 +100,9 @@ public class Silence {
 
 
     private String processTextMsg(String ask) throws UnsupportedEncodingException {
-        return TransApi.trans2ENRes(ask);
+        String youdaoURL = "http://dict.youdao.com/dictvoice?audio=";
+        String transRes = TransApi.trans2ENRes(ask).replace(' ','+');
+        return youdaoURL+transRes;
     }
 
     private Map<String, String> parseXml(HttpServletRequest request) throws Exception {
