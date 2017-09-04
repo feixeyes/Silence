@@ -1,6 +1,9 @@
 package com.baidu.translate;
 
+import com.feixeyes.utils.Helper;
+import com.google.gson.Gson;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TransApi {
@@ -19,12 +22,7 @@ public class TransApi {
         return HttpGet.get(TRANS_API_HOST, params);
     }
 
-    public static String trans2EN(String query){
-        String APP_ID = "20170903000080239";
-        String SECURITY_KEY = "iaHAFo0D7Wr1wNpS8ttZ";
-        TransApi api = new TransApi(APP_ID, SECURITY_KEY);
-        return api.getTransResult(query, "auto", "en");
-    }
+
 
     private Map<String, String> buildParams(String query, String from, String to) {
         Map<String, String> params = new HashMap<String, String>();
@@ -45,4 +43,44 @@ public class TransApi {
         return params;
     }
 
+
+    public static String trans2EN(String query){
+        String APP_ID = Helper.getProperty("APP_ID");
+        String SECURITY_KEY = Helper.getProperty("SECURITY_KEY");
+        TransApi api = new TransApi(APP_ID, SECURITY_KEY);
+        return api.getTransResult(query, "auto", "en");
+    }
+
+
+    public static String trans2ENRes(String query) {
+        String jsonStr = trans2EN(query);
+        Gson gson = new Gson();
+        BaiduTransRes obj = gson.fromJson(jsonStr,BaiduTransRes.class);
+        return obj.getSingleResList();
+    }
 }
+
+class BaiduTransRes {
+    String from;
+    String to;
+    List<BaiduTransResNode> trans_result;
+
+    public List<BaiduTransResNode> getResList(){
+        return trans_result;
+    }
+
+    public String getSingleResList(){
+        return trans_result.get(0).getRes();
+    }
+}
+
+class BaiduTransResNode {
+    String src;
+    String dst;
+
+    public String getRes() {
+        return dst;
+    }
+}
+
+
